@@ -13,17 +13,31 @@ contract TeamProject {
 
     mapping(bytes32 => Comment[]) private allComments;
 
+    event CommentAddedEvent(
+        uint256 indexed id,
+        address indexed author,
+        string indexed content
+    );
+
+    event LikeAddedEvent(
+        bytes32 indexed txHash,
+        uint256 indexed id,
+        address indexed whoLike
+    );
+
     function addCommentByTxHash(bytes32 _txHash, string memory _content)
         public
     {
+        commentID++;
         allComments[_txHash].push(
             Comment({
-                id: commentID++,
+                id: commentID,
                 author: msg.sender,
                 content: _content,
                 likes: new address[](0)
             })
         );
+        emit CommentAddedEvent(commentID, msg.sender, _content);
     }
 
     function getCommentsByTxHash(bytes32 _txHash)
@@ -54,6 +68,7 @@ contract TeamProject {
                     }
                 }
                 commentsInOneHash[i].likes.push(msg.sender);
+                emit LikeAddedEvent(_txHash, _id, msg.sender);
                 return true;
             }
         }
